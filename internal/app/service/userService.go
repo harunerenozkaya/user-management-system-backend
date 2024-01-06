@@ -9,3 +9,8 @@ func GetAllUsers() ([]domain.User, error) {
 	// Get all users from repository
 	return repository.GetAllUsers()
 }
+
+func CreateNewUser(user domain.User) (int64 ,error) {
+	// Create new user in repository
+	return repository.CreateNewUser(user)
+}

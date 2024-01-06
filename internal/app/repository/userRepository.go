@@ -29,10 +29,7 @@ func init() {
 	)`)
 	if err != nil {
 		panic(err)
-	} else {
-		fmt.Println("Successfully created users table")
 	}
-
 }
 
 func GetAllUsers() ([]domain.User, error) {
@@ -54,4 +51,22 @@ func GetAllUsers() ([]domain.User, error) {
 		users = append(users, u)
 	}
 	return users, nil
+}
+
+func CreateNewUser(user domain.User) (int64, error) {
+	// Prepare SQL statement for inserting a new user
+	stmt, err := db.Prepare("INSERT INTO users(name, surname, email) VALUES(?, ?, ?)")
+	if err != nil {
+		return -1, err
+	}
+	defer stmt.Close()
+
+	// Execute the prepared statement with user data
+	var result sql.Result
+	result, err = stmt.Exec(user.Name, user.Surname, user.Email)
+	if err != nil {
+		return -1, err
+	}
+	id, err := result.LastInsertId()
+	return id, nil
 }
