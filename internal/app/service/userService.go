@@ -5,27 +5,39 @@ import (
 	"user-management-api/internal/domain"
 )
 
-func GetAllUsers() ([]domain.User, error) {
+type UserService interface {
+	GetAllUsers() ([]domain.User, error)
+	CreateNewUser(user domain.User) (int64, error)
+	GetUser(id int) (domain.User, error)
+	UpdateUser(id int, user domain.User) error
+	DeleteUser(id int) error
+}
+
+type SQLUserService struct {
+	Repo repository.UserRepository
+}
+
+func (s *SQLUserService) GetAllUsers() ([]domain.User, error) {
 	// Get all users from repository
-	return repository.GetAllUsers()
+	return s.Repo.GetAllUsers()
 }
 
-func CreateNewUser(user domain.User) (int64, error) {
+func (s *SQLUserService) CreateNewUser(user domain.User) (int64, error) {
 	// Create new user in repository
-	return repository.CreateNewUser(user)
+	return s.Repo.CreateNewUser(user)
 }
 
-func GetUser(id int) (domain.User, error) {
+func (s *SQLUserService) GetUser(id int) (domain.User, error) {
 	// Get user from repository
-	return repository.GetUser(id)
+	return s.Repo.GetUser(id)
 }
 
-func UpdateUser(id int, user domain.User) error {
+func (s *SQLUserService) UpdateUser(id int, user domain.User) error {
 	// Update user in repository
-	return repository.UpdateUser(id, user)
+	return s.Repo.UpdateUser(id, user)
 }
 
-func DeleteUser(id int) error {
+func (s *SQLUserService) DeleteUser(id int) error {
 	// Delete user from repository
-	return repository.DeleteUser(id)
+	return s.Repo.DeleteUser(id)
 }

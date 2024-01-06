@@ -2,43 +2,30 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
 	"user-management-api/internal/domain"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
-var db *sql.DB
-
-func init() {
-	var err error
-
-	// Connect to database
-	db, err = sql.Open("sqlite3", "./database.db")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Successfully connected to database")
-
-	// Create users table if it doesn't exist
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS users (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT,
-		surname TEXT,
-		email TEXT UNIQUE
-	)`)
-	if err != nil {
-		panic(err)
-	}
+type UserRepository interface {
+	GetAllUsers() ([]domain.User, error)
+	CreateNewUser(user domain.User) (int64, error)
+	GetUser(id int) (domain.User, error)
+	UpdateUser(id int, user domain.User) error
+	DeleteUser(id int) error
 }
 
-func SetDataBase(database *sql.DB) {
-	db = database
+// SQLUserRepository is an implementation of UserRepository using a SQL database
+type SQLUserRepository struct {
+	DB *sql.DB
 }
 
-func GetAllUsers() ([]domain.User, error) {
+// NewUserRepository creates a new instance of SQLUserRepository
+func NewUserRepository(db *sql.DB) UserRepository {
+	return &SQLUserRepository{DB: db}
+}
+
+func (repo *SQLUserRepository) GetAllUsers() ([]domain.User, error) {
 	// Query all users
-	rows, err := db.Query("SELECT id, name, surname, email FROM users")
+	rows, err := repo.DB.Query("SELECT id, name, surname, email FROM users")
 	if err != nil {
 		return nil, err
 	}
@@ -57,27 +44,25 @@ func GetAllUsers() ([]domain.User, error) {
 	return users, nil
 }
 
-func CreateNewUser(user domain.User) (int64, error) {
+func (repo *SQLUserRepository) CreateNewUser(user domain.User) (int64, error) {
 	// Prepare SQL statement for inserting a new user
-	stmt, err := db.Prepare("INSERT INTO users(name, surname, email) VALUES(?, ?, ?)")
+	stmt, err := repo.DB.Prepare("INSERT INTO users(name, surname, email) VALUES(?, ?, ?)")
 	if err != nil {
 		return -1, err
 	}
 	defer stmt.Close()
 
 	// Execute the prepared statement with user data
-	var result sql.Result
-	result, err = stmt.Exec(user.Name, user.Surname, user.Email)
+	result, err := stmt.Exec(user.Name, user.Surname, user.Email)
 	if err != nil {
 		return -1, err
 	}
-	id, err := result.LastInsertId()
-	return id, nil
+	return result.LastInsertId()
 }
 
-func GetUser(id int) (domain.User, error) {
+func (repo *SQLUserRepository) GetUser(id int) (domain.User, error) {
 	// Query the user with the given ID
-	row := db.QueryRow("SELECT id, name, surname, email FROM users WHERE id = ?", id)
+	row := repo.DB.QueryRow("SELECT id, name, surname, email FROM users WHERE id = ?", id)
 
 	// Create new user object
 	var u domain.User
@@ -88,9 +73,9 @@ func GetUser(id int) (domain.User, error) {
 	return u, nil
 }
 
-func UpdateUser(id int, user domain.User) error {
+func (repo *SQLUserRepository) UpdateUser(id int, user domain.User) error {
 	// Prepare SQL statement for updating user
-	stmt, err := db.Prepare("UPDATE users SET name = ?, surname = ?, email = ? WHERE id = ?")
+	stmt, err := repo.DB.Prepare("UPDATE users SET name = ?, surname = ?, email = ? WHERE id = ?")
 	if err != nil {
 		return err
 	}
@@ -98,15 +83,12 @@ func UpdateUser(id int, user domain.User) error {
 
 	// Execute the prepared statement with user data
 	_, err = stmt.Exec(user.Name, user.Surname, user.Email, id)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
-func DeleteUser(id int) error {
+func (repo *SQLUserRepository) DeleteUser(id int) error {
 	// Prepare SQL statement for deleting user
-	stmt, err := db.Prepare("DELETE FROM users WHERE id = ?")
+	stmt, err := repo.DB.Prepare("DELETE FROM users WHERE id = ?")
 	if err != nil {
 		return err
 	}
@@ -114,8 +96,5 @@ func DeleteUser(id int) error {
 
 	// Execute the prepared statement with user ID
 	_, err = stmt.Exec(id)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

@@ -10,9 +10,21 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetAllUsers(w http.ResponseWriter, r *http.Request) {
+type UserHandler interface {
+	GetAllUsers(w http.ResponseWriter, r *http.Request)
+	CreateNewUser(w http.ResponseWriter, r *http.Request)
+	GetUser(w http.ResponseWriter, r *http.Request)
+	UpdateUser(w http.ResponseWriter, r *http.Request)
+	DeleteUser(w http.ResponseWriter, r *http.Request)
+}
+
+type SQLUserHandler struct {
+	Service service.UserService
+}
+
+func (h *SQLUserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	// Get all users
-	users, err := service.GetAllUsers()
+	users, err := h.Service.GetAllUsers()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -25,7 +37,7 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateNewUser(w http.ResponseWriter, r *http.Request) {
+func (h *SQLUserHandler) CreateNewUser(w http.ResponseWriter, r *http.Request) {
 	// Get user from request body
 	var user domain.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -34,7 +46,7 @@ func CreateNewUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create new user
-	id, err := service.CreateNewUser(user)
+	id, err := h.Service.CreateNewUser(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -48,7 +60,7 @@ func CreateNewUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetUser(w http.ResponseWriter, r *http.Request) {
+func (h *SQLUserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from request
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
@@ -58,7 +70,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user
-	user, err := service.GetUser(id)
+	user, err := h.Service.GetUser(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -71,7 +83,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
+func (h *SQLUserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from request
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
@@ -89,7 +101,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	// Update user
 	user.ID = id
-	if err := service.UpdateUser(id, user); err != nil {
+	if err := h.Service.UpdateUser(id, user); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -101,7 +113,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DeleteUser(w http.ResponseWriter, r *http.Request) {
+func (h *SQLUserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from request
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
@@ -111,7 +123,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete user
-	if err := service.DeleteUser(id); err != nil {
+	if err := h.Service.DeleteUser(id); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
