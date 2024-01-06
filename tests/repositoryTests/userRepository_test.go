@@ -33,14 +33,14 @@ func TestGetAllUsers(t *testing.T) {
 	db := setupInMemoryDB(t)
 	defer db.Close()
 
+	// Set global db variable to in-memory db
+	repo := repository.NewUserRepository(db)
+
 	// Insert test data
 	_, err := db.Exec("INSERT INTO users (name, surname, email) VALUES (?, ?, ?)", "John", "Doe", "john@example.com")
 	assert.NoError(t, err)
 
-	// Set global db variable to in-memory db
-	repository.SetDataBase(db)
-
-	users, err := repository.GetAllUsers()
+	users, err := repo.GetAllUsers()
 	assert.NoError(t, err)
 	assert.Len(t, users, 1)
 	assert.Equal(t, "John", users[0].Name)
@@ -51,9 +51,9 @@ func TestCreateNewUser(t *testing.T) {
 	defer db.Close()
 
 	// Set global db variable to in-memory db
-	repository.SetDataBase(db)
+	repo := repository.NewUserRepository(db)
 
-	id, err := repository.CreateNewUser(domain.User{
+	id, err := repo.CreateNewUser(domain.User{
 		Name:    "John",
 		Surname: "Doe",
 		Email:   "adad@gmail.com",
@@ -71,9 +71,9 @@ func TestGetUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Set global db variable to in-memory db
-	repository.SetDataBase(db)
+	repo := repository.NewUserRepository(db)
 
-	user, err := repository.GetUser(1)
+	user, err := repo.GetUser(1)
 	assert.NoError(t, err)
 	assert.Equal(t, "John", user.Name)
 }
@@ -87,12 +87,12 @@ func TestUpdateUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Set global db variable to in-memory db
-	repository.SetDataBase(db)
+	repo := repository.NewUserRepository(db)
 
-	err = repository.UpdateUser(1, domain.User{Name: "John", Surname: "Doe", Email: "123123123@gmail.com"})
+	err = repo.UpdateUser(1, domain.User{Name: "John", Surname: "Doe", Email: "123123123@gmail.com"})
 	assert.NoError(t, err)
 
-	user, err := repository.GetUser(1)
+	user, err := repo.GetUser(1)
 	assert.NoError(t, err)
 	assert.Equal(t, "123123123@gmail.com", user.Email)
 }
@@ -106,12 +106,12 @@ func TestDeleteUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Set global db variable to in-memory db
-	repository.SetDataBase(db)
+	repo := repository.NewUserRepository(db)
 
-	err = repository.DeleteUser(1)
+	err = repo.DeleteUser(1)
 	assert.NoError(t, err)
 
-	user, err := repository.GetUser(1)
+	user, err := repo.GetUser(1)
 	assert.Error(t, err)
 	assert.Equal(t, domain.User{}, user)
 }
