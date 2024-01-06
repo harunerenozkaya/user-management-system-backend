@@ -25,6 +25,20 @@ func main() {
 	userService := service.SQLUserService{Repo: userRepo}
 	userHandler := handler.SQLUserHandler{Service: &userService}
 
+	// Create the users table if it doesn't exist
+	createTableSQL := `
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        surname TEXT,
+        email TEXT UNIQUE,
+        created_at TEXT,
+        updated_at TEXT
+    );`
+	if _, err := db.Exec(createTableSQL); err != nil {
+		log.Fatalf("Failed to create users table: %v", err)
+	}
+
 	r := mux.NewRouter()
 
 	// Setup routes

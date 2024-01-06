@@ -25,7 +25,7 @@ func NewUserRepository(db *sql.DB) UserRepository {
 
 func (repo *SQLUserRepository) GetAllUsers() ([]domain.User, error) {
 	// Query all users
-	rows, err := repo.DB.Query("SELECT id, name, surname, email FROM users")
+	rows, err := repo.DB.Query("SELECT id, name, surname, email, created_at, updated_at FROM users")
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (repo *SQLUserRepository) GetAllUsers() ([]domain.User, error) {
 	var users []domain.User
 	for rows.Next() {
 		var u domain.User
-		err := rows.Scan(&u.ID, &u.Name, &u.Surname, &u.Email)
+		err := rows.Scan(&u.ID, &u.Name, &u.Surname, &u.Email, &u.CreatedAt, &u.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -46,7 +46,7 @@ func (repo *SQLUserRepository) GetAllUsers() ([]domain.User, error) {
 
 func (repo *SQLUserRepository) CreateNewUser(user domain.User) (int64, error) {
 	// Prepare SQL statement for inserting a new user
-	stmt, err := repo.DB.Prepare("INSERT INTO users(name, surname, email) VALUES(?, ?, ?)")
+	stmt, err := repo.DB.Prepare("INSERT INTO users(name, surname, email, created_at, updated_at) VALUES(?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)")
 	if err != nil {
 		return -1, err
 	}
@@ -62,11 +62,11 @@ func (repo *SQLUserRepository) CreateNewUser(user domain.User) (int64, error) {
 
 func (repo *SQLUserRepository) GetUser(id int) (domain.User, error) {
 	// Query the user with the given ID
-	row := repo.DB.QueryRow("SELECT id, name, surname, email FROM users WHERE id = ?", id)
+	row := repo.DB.QueryRow("SELECT id, name, surname, email, created_at, updated_at FROM users WHERE id = ?", id)
 
 	// Create new user object
 	var u domain.User
-	err := row.Scan(&u.ID, &u.Name, &u.Surname, &u.Email)
+	err := row.Scan(&u.ID, &u.Name, &u.Surname, &u.Email, &u.CreatedAt, &u.UpdatedAt)
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -75,7 +75,7 @@ func (repo *SQLUserRepository) GetUser(id int) (domain.User, error) {
 
 func (repo *SQLUserRepository) UpdateUser(id int, user domain.User) error {
 	// Prepare SQL statement for updating user
-	stmt, err := repo.DB.Prepare("UPDATE users SET name = ?, surname = ?, email = ? WHERE id = ?")
+	stmt, err := repo.DB.Prepare("UPDATE users SET name = ?, surname = ?, email = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
 	if err != nil {
 		return err
 	}
