@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"user-management-api/internal/app/handler"
@@ -14,11 +15,15 @@ import (
 
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(r.Header)
+		fmt.Println(r.Method)
+
 		// Set CORS headers
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
+		// Handle OPTIONS requests
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
@@ -62,11 +67,11 @@ func main() {
 	r.Use(corsMiddleware)
 
 	// Setup routes
-	r.HandleFunc("/users", userHandler.GetAllUsers).Methods("GET")
-	r.HandleFunc("/users", userHandler.CreateNewUser).Methods("POST")
-	r.HandleFunc("/users/{id}", userHandler.GetUser).Methods("GET")
-	r.HandleFunc("/users/{id}", userHandler.UpdateUser).Methods("PUT")
-	r.HandleFunc("/users/{id}", userHandler.DeleteUser).Methods("DELETE")
+	r.HandleFunc("/users", userHandler.GetAllUsers).Methods("GET", "OPTIONS")
+	r.HandleFunc("/users", userHandler.CreateNewUser).Methods("POST", "OPTIONS")
+	r.HandleFunc("/users/{id}", userHandler.GetUser).Methods("GET", "OPTIONS")
+	r.HandleFunc("/users/{id}", userHandler.UpdateUser).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/users/{id}", userHandler.DeleteUser).Methods("DELETE", "OPTIONS")
 
-	log.Fatal(http.ListenAndServe(":8000", r))
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
