@@ -19,3 +19,8 @@ func GetUser(id int) (domain.User, error) {
 	// Get user from repository
 	return repository.GetUser(id)
 }
+
+func UpdateUser(id int, user domain.User) error {
+	// Update user in repository
+	return repository.UpdateUser(id, user)
+}

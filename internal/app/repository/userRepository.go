@@ -83,3 +83,19 @@ func GetUser(id int) (domain.User, error) {
 	}
 	return u, nil
 }
+
+func UpdateUser(id int, user domain.User) error {
+	// Prepare SQL statement for updating user
+	stmt, err := db.Prepare("UPDATE users SET name = ?, surname = ?, email = ? WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	// Execute the prepared statement with user data
+	_, err = stmt.Exec(user.Name, user.Surname, user.Email, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
