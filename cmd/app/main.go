@@ -12,6 +12,23 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set CORS headers
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		// Pass the request to the next handler in the chain
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	// Connect to database
 	db, err := sql.Open("sqlite3", "./database.db")
@@ -40,6 +57,9 @@ func main() {
 	}
 
 	r := mux.NewRouter()
+
+	// Use the CORS middleware
+	r.Use(corsMiddleware)
 
 	// Setup routes
 	r.HandleFunc("/users", userHandler.GetAllUsers).Methods("GET")
