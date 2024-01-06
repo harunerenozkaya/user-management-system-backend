@@ -100,3 +100,25 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode user", http.StatusInternalServerError)
 	}
 }
+
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	// Get user ID from request
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	// Delete user
+	if err := service.DeleteUser(id); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Set Content-Type header and write response
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(id); err != nil {
+		http.Error(w, "Failed to encode user", http.StatusInternalServerError)
+	}
+}

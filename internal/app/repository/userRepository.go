@@ -99,3 +99,19 @@ func UpdateUser(id int, user domain.User) error {
 	}
 	return nil
 }
+
+func DeleteUser(id int) error {
+	// Prepare SQL statement for deleting user
+	stmt, err := db.Prepare("DELETE FROM users WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	// Execute the prepared statement with user ID
+	_, err = stmt.Exec(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}

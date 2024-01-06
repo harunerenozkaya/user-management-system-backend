@@ -24,3 +24,8 @@ func UpdateUser(id int, user domain.User) error {
 	// Update user in repository
 	return repository.UpdateUser(id, user)
 }
+
+func DeleteUser(id int) error {
+	// Delete user from repository
+	return repository.DeleteUser(id)
+}
