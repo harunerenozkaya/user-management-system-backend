@@ -14,6 +14,7 @@ func main() {
 	// Setup routes
 	r.HandleFunc("/users", handler.GetAllUsers).Methods("GET")
 	r.HandleFunc("/users", handler.CreateNewUser).Methods("POST")
+	r.HandleFunc("/users/{id}", handler.GetUser).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8000", r))
 }

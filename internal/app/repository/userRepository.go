@@ -70,3 +70,16 @@ func CreateNewUser(user domain.User) (int64, error) {
 	id, err := result.LastInsertId()
 	return id, nil
 }
+
+func GetUser(id int) (domain.User, error) {
+	// Query the user with the given ID
+	row := db.QueryRow("SELECT id, name, surname, email FROM users WHERE id = ?", id)
+
+	// Create new user object
+	var u domain.User
+	err := row.Scan(&u.ID, &u.Name, &u.Surname, &u.Email)
+	if err != nil {
+		return domain.User{}, err
+	}
+	return u, nil
+}
