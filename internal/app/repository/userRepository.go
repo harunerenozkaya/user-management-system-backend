@@ -32,6 +32,10 @@ func init() {
 	}
 }
 
+func SetDataBase(database *sql.DB) {
+	db = database
+}
+
 func GetAllUsers() ([]domain.User, error) {
 	// Query all users
 	rows, err := db.Query("SELECT id, name, surname, email FROM users")
