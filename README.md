@@ -20,7 +20,7 @@ The User Management System is a system that provides a mechanism for storing and
 
 ## Navigation
 - Backend : this
-- Fronted : https://github.com/harunerenozkaya/user-management-system-frontend
+- Frontend : https://github.com/harunerenozkaya/user-management-system-frontend
 
 ## Prerequisites
 
@@ -34,7 +34,7 @@ Before running this project, make sure you have the following installed:
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/your-username/user-management-system-backend.git
+    git clone https://github.com/harunerenozkaya/user-management-system-backend
     ```
 
 2. Install the dependencies:
